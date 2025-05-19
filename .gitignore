@@ -11,3 +11,5 @@ crash.log
 # Service account keys
 *.json
 
+google-cloud-cli-linux-x86_64.tar.gz
+google-cloud-sdk/

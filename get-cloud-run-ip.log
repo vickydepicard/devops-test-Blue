@@ -1,0 +1,23 @@
+[2025-05-19 14:51:48] Démarrage du script pour l'environnement 'dev'
+WARNING: Your active project does not match the quota project in your local Application Default Credentials file. This might result in unexpected quota issues.
+
+To update your Application Default Credentials quota project, use the `gcloud auth application-default set-quota-project` command.
+WARNING: [devopseduque@gmail.com] does not have permission to access projects instance [mon-projet-dev] (or it may not exist): The caller does not have permission. This command is authenticated as devopseduque@gmail.com which is the active account specified by the [core/account] property
+Updated property [core/project].
+Updated property [run/region].
+ERROR: (gcloud.run.services.describe) PERMISSION_DENIED: Permission denied on resource project mon-projet-dev. This command is authenticated as devopseduque@gmail.com which is the active account specified by the [core/account] property.
+Permission denied on resource project mon-projet-dev.
+Google developers console
+https://console.developers.google.com
+- '@type': type.googleapis.com/google.rpc.ErrorInfo
+  domain: googleapis.com
+  metadata:
+    consumer: projects/mon-projet-dev
+    containerInfo: mon-projet-dev
+    service: run.googleapis.com
+  reason: CONSUMER_INVALID
+[2025-05-19 14:51:57] Erreur : impossible de récupérer l'URL du service 'mon-service-dev'
+[2025-05-19 15:14:18] Démarrage du script pour l'environnement 'dev'
+Updated property [core/project].
+Updated property [run/region].
+[2025-05-19 15:14:26] Erreur : le service 'mon-service-dev' n'existe pas dans le projet 'devops-test-terraform-blue' et la région 'europe-west1'.

@@ -1,9 +1,11 @@
 name: CI/CD Pipeline
+# Nom du workflow GitHub Actions
 
 on:
   push:
     branches:
       - main
+# Déclenchement du workflow uniquement sur les push vers la branche 'main'
 
 env:
   PROJECT_ID: ${{ secrets.GCLOUD_PROJECT }}
@@ -11,16 +13,18 @@ env:
   SERVICE_NAME: php-fpm-service
   IMAGE_NAME: php-fpm-app
   GCR_HOSTNAME: ${{ secrets.GCR_HOSTNAME }}
+# Variables d'environnement utilisées dans le workflow, récupérées depuis les secrets GitHub
 
 jobs:
   build-deploy:
     name: Build and Deploy to Cloud Run
     runs-on: ubuntu-latest
+    # Exécute ce job sur une machine virtuelle Ubuntu récente
 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
-        # Récupère le code source du repo
+        # Récupère le code source de la branche 'main' du repository
 
       - name: Set up Google Cloud SDK
         uses: google-github-actions/setup-gcloud@v1
@@ -28,28 +32,19 @@ jobs:
           project_id: ${{ env.PROJECT_ID }}
           service_account_key: ${{ secrets.GCLOUD_SA_KEY }}
           export_default_credentials: true
-        # Installe et authentifie le CLI gcloud avec le compte de service
-
-      - name: Run PHP unit tests
-        #run: |
-         # composer install
-          #./vendor/bin/phpunit tests
-        # Lance les tests unitaires PHP pour valider le code avant build
+        # Installe et configure le SDK Google Cloud avec le compte de service pour authentification
 
       - name: Configure Docker for GCR
-        run: |
-          gcloud auth configure-docker ${{ env.GCR_HOSTNAME }}
-        # Configure Docker pour pouvoir push sur Google Container Registry
+        run: gcloud auth configure-docker ${{ env.GCR_HOSTNAME }}
+        # Configure Docker pour pouvoir pousser des images vers Google Container Registry (GCR)
 
       - name: Build Docker Image
-        run: |
-          docker build -t ${{ env.GCR_HOSTNAME }}/${{ env.PROJECT_ID }}/${{ env.IMAGE_NAME }}:latest .
-        # Construit l’image Docker à partir du Dockerfile
+        run: docker build -t ${{ env.GCR_HOSTNAME }}/${{ env.PROJECT_ID }}/${{ env.IMAGE_NAME }}:latest .
+        # Construit l'image Docker à partir du Dockerfile dans le répertoire racine du repo
 
       - name: Push Docker Image to GCR
-        run: |
-          docker push ${{ env.GCR_HOSTNAME }}/${{ env.PROJECT_ID }}/${{ env.IMAGE_NAME }}:latest
-        # Pousse l’image vers Google Container Registry
+        run: docker push ${{ env.GCR_HOSTNAME }}/${{ env.PROJECT_ID }}/${{ env.IMAGE_NAME }}:latest
+        # Pousse l'image Docker construite vers le registre Google Container Registry
 
       - name: Deploy to Cloud Run
         run: |
@@ -58,5 +53,6 @@ jobs:
             --region ${{ env.REGION }} \
             --platform managed \
             --allow-unauthenticated
-        # Déploie l’image sur Cloud Run, rend le service accessible publiquement
+        # Déploie l'image Docker sur Cloud Run dans la région spécifiée
+        # Rend le service accessible publiquement (non authentifié)
 

@@ -20,6 +20,7 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
+        # Récupère le code source du repo
 
       - name: Set up Google Cloud SDK
         uses: google-github-actions/setup-gcloud@v1
@@ -27,18 +28,28 @@ jobs:
           project_id: ${{ env.PROJECT_ID }}
           service_account_key: ${{ secrets.GCLOUD_SA_KEY }}
           export_default_credentials: true
+        # Installe et authentifie le CLI gcloud avec le compte de service
+
+      - name: Run PHP unit tests
+        run: |
+          composer install
+          ./vendor/bin/phpunit tests
+        # Lance les tests unitaires PHP pour valider le code avant build
 
       - name: Configure Docker for GCR
         run: |
           gcloud auth configure-docker ${{ env.GCR_HOSTNAME }}
+        # Configure Docker pour pouvoir push sur Google Container Registry
 
       - name: Build Docker Image
         run: |
           docker build -t ${{ env.GCR_HOSTNAME }}/${{ env.PROJECT_ID }}/${{ env.IMAGE_NAME }}:latest .
+        # Construit l’image Docker à partir du Dockerfile
 
       - name: Push Docker Image to GCR
         run: |
           docker push ${{ env.GCR_HOSTNAME }}/${{ env.PROJECT_ID }}/${{ env.IMAGE_NAME }}:latest
+        # Pousse l’image vers Google Container Registry
 
       - name: Deploy to Cloud Run
         run: |
@@ -47,4 +58,5 @@ jobs:
             --region ${{ env.REGION }} \
             --platform managed \
             --allow-unauthenticated
+        # Déploie l’image sur Cloud Run, rend le service accessible publiquement
 

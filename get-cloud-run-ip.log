@@ -25,3 +25,7 @@ Updated property [run/region].
 Updated property [core/project].
 Updated property [run/region].
 [2025-05-19 16:19:20] Erreur : le service 'mon-service-dev' n'existe pas dans le projet 'devops-test-terraform-blue' et la région 'europe-west1'.
+[2025-05-19 17:54:56] Démarrage du script pour l'environnement 'dev'
+Updated property [core/project].
+Updated property [run/region].
+[2025-05-19 17:55:04] Erreur : le service 'mon-service-dev' n'existe pas dans le projet 'devops-test-terraform-blue' et la région 'europe-west1'.

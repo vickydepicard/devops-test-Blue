@@ -4,7 +4,11 @@ terraform {
   required_providers {
     google = {
       source  = "hashicorp/google"
-      version = ">= 4.0"
+      version =  "~> 6.0"           #"~> 5.0"
+    }
+    google-beta = {
+      source  = "hashicorp/google-beta"
+      version = ">= 4.46.0"
     }
   }
 
@@ -19,3 +23,7 @@ provider "google" {
   region  = var.region_code
 }
 
+provider "google-beta" {
+  project = var.project_identifier
+  region  = var.region_code
+}

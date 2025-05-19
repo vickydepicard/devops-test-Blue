@@ -39,7 +39,8 @@ jobs:
         # Configure Docker pour pouvoir pousser des images vers Google Container Registry (GCR)
 
       - name: Build Docker Image
-        run: docker build -t ${{ env.GCR_HOSTNAME }}/${{ env.PROJECT_ID }}/${{ env.IMAGE_NAME }}:latest .
+        run: docker build -t ${{ env.GCR_HOSTNAME }}/${{ env.PROJECT_ID }}/${{ env.IMAGE_NAME }}:latest -f modules/cloud_run/Dockerfile modules/cloud_run/
+
         # Construit l'image Docker à partir du Dockerfile dans le répertoire racine du repo
 
       - name: Push Docker Image to GCR

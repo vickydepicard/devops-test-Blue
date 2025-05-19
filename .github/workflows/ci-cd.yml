@@ -1,59 +1,61 @@
+# 🔁 Nom du workflow GitHub Actions
 name: CI/CD Pipeline
-# Nom du workflow GitHub Actions
 
+# 🚀 Déclenchement automatique à chaque push sur la branche "main"
 on:
   push:
     branches:
       - main
-# Déclenchement du workflow uniquement sur les push vers la branche 'main'
 
+# 🌍 Variables d’environnement globales (réutilisables dans tout le pipeline)
 env:
-  PROJECT_ID: ${{ secrets.GCLOUD_PROJECT }}
-  REGION: ${{ secrets.GCLOUD_REGION }}
-  SERVICE_NAME: php-fpm-service
-  IMAGE_NAME: php-fpm-app
-  GCR_HOSTNAME: ${{ secrets.GCR_HOSTNAME }}
-# Variables d'environnement utilisées dans le workflow, récupérées depuis les secrets GitHub
+  PROJECT_ID: ${{ secrets.GCLOUD_PROJECT }}           # ID du projet GCP (à stocker dans les secrets GitHub)
+  REGION: ${{ secrets.GCLOUD_REGION }}               # Région GCP (ex: europe-west1)
+  SERVICE_NAME: php-fpm-service                      # Nom du service Cloud Run
+  IMAGE_NAME: php-fpm-app                            # Nom de l’image Docker
+  REPOSITORY_NAME: my-repo                           # Nom du dépôt Artifact Registry
+  GCR_HOSTNAME: europe-docker.pkg.dev                # Domaine du registre Docker Artifact Registry (pour la région Europe)
 
 jobs:
   build-deploy:
-    name: Build and Deploy to Cloud Run
-    runs-on: ubuntu-latest
-    # Exécute ce job sur une machine virtuelle Ubuntu récente
+    name: Build and Deploy to Cloud Run              # 💡 Nom du job affiché dans l’interface GitHub Actions
+    runs-on: ubuntu-latest                           # 🐧 Exécute le job sur la dernière version d’Ubuntu disponible
 
     steps:
+      #  Étape 1 : Récupérer le code source du dépôt GitHub
       - name: Checkout Repository
         uses: actions/checkout@v3
-        # Récupère le code source de la branche 'main' du repository
 
+      #  Étape 2 : Installer et configurer le SDK Google Cloud
       - name: Set up Google Cloud SDK
         uses: google-github-actions/setup-gcloud@v1
         with:
-          project_id: ${{ env.PROJECT_ID }}
-          service_account_key: ${{ secrets.GCLOUD_SA_KEY }}
-          export_default_credentials: true
-        # Installe et configure le SDK Google Cloud avec le compte de service pour authentification
+          project_id: ${{ env.PROJECT_ID }}          # Utilise l’ID du projet défini en variable d’environnement
+          service_account_key: ${{ secrets.GCLOUD_SA_KEY }} # Clé du compte de service stockée dans GitHub secrets
+          export_default_credentials: true           # Rend les identifiants accessibles aux étapes suivantes
 
-      - name: Configure Docker for GCR
+      #  Étape 3 : Authentifier Docker avec Artifact Registry (nécessaire pour le push)
+      - name: Configure Docker for Artifact Registry
         run: gcloud auth configure-docker ${{ env.GCR_HOSTNAME }}
-        # Configure Docker pour pouvoir pousser des images vers Google Container Registry (GCR)
 
+      # Étape 4 : Construire l’image Docker avec le bon chemin du Dockerfile
       - name: Build Docker Image
-        run: docker build -t ${{ env.GCR_HOSTNAME }}/${{ env.PROJECT_ID }}/${{ env.IMAGE_NAME }}:latest -f modules/cloud_run/Dockerfile modules/cloud_run/
+        run: |
+          docker build \
+            -t ${{ env.GCR_HOSTNAME }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY_NAME }}/${{ env.IMAGE_NAME }}:latest \
+            -f modules/cloud_run/Dockerfile modules/cloud_run/
 
-        # Construit l'image Docker à partir du Dockerfile dans le répertoire racine du repo
+      #  Étape 5 : Pousser l’image construite vers Artifact Registry
+      - name: Push Docker Image to Artifact Registry
+        run: |
+          docker push ${{ env.GCR_HOSTNAME }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY_NAME }}/${{ env.IMAGE_NAME }}:latest
 
-      - name: Push Docker Image to GCR
-        run: docker push ${{ env.GCR_HOSTNAME }}/${{ env.PROJECT_ID }}/${{ env.IMAGE_NAME }}:latest
-        # Pousse l'image Docker construite vers le registre Google Container Registry
-
+      # Étape 6 : Déployer l’image sur Cloud Run
       - name: Deploy to Cloud Run
         run: |
           gcloud run deploy ${{ env.SERVICE_NAME }} \
-            --image ${{ env.GCR_HOSTNAME }}/${{ env.PROJECT_ID }}/${{ env.IMAGE_NAME }}:latest \
+            --image ${{ env.GCR_HOSTNAME }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY_NAME }}/${{ env.IMAGE_NAME }}:latest \
             --region ${{ env.REGION }} \
             --platform managed \
-            --allow-unauthenticated
-        # Déploie l'image Docker sur Cloud Run dans la région spécifiée
-        # Rend le service accessible publiquement (non authentifié)
+            --allow-unauthenticated                # Accès public à l’URL Cloud Run (à adapter selon besoins de sécurité)
 

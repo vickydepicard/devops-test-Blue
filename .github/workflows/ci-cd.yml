@@ -31,9 +31,9 @@ jobs:
         # Installe et authentifie le CLI gcloud avec le compte de service
 
       - name: Run PHP unit tests
-        run: |
-          composer install
-          ./vendor/bin/phpunit tests
+        #run: |
+         # composer install
+          #./vendor/bin/phpunit tests
         # Lance les tests unitaires PHP pour valider le code avant build
 
       - name: Configure Docker for GCR

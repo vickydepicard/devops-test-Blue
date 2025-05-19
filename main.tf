@@ -7,3 +7,9 @@ module "db_module" {
   deployment_region    = var.region_code
 }
 
+module "cloud_storage" {
+  source      = "./modules/cloud_storage"
+  bucket_name = "mon-bucket-unique-12345"
+  location    = "europe-west1"
+}
+

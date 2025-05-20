@@ -22,3 +22,9 @@ Updated property [run/region].
 [2025-05-20 19:03:04] URL du service : https://mon-service-dev-364751985015.europe-west1.run.app
 [2025-05-20 19:03:04] Adresse IP publique du service : 2600:1900:4245:200::
 [2025-05-20 19:03:04] Script exécuté avec succès pour l'environnement 'dev'.
+[2025-05-20 19:09:36] Démarrage du script pour l'environnement 'dev'
+Updated property [core/project].
+Updated property [run/region].
+[2025-05-20 19:09:44] URL du service : https://mon-service-dev-364751985015.europe-west1.run.app
+[2025-05-20 19:09:44] Adresse IP publique du service : 2600:1901:81d5:200::
+[2025-05-20 19:09:44] Script exécuté avec succès pour l'environnement 'dev'.

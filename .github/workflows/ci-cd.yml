@@ -1,72 +1,89 @@
-name: CI/CD Pipeline  # Nom du workflow GitHub Actions
+name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ main ]  # Se déclenche à chaque push sur la branche main
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 env:
-  PROJECT_ID:     ${{ secrets.GCP_PROJECT_ID }}        # ID du projet GCP (stocké dans les Secrets)
-  REGION:         ${{ secrets.GCP_REGION }}            # Région de déploiement (ex. europe-west1)
-  SERVICE_NAME:   php-fpm-service                      # Nom du service Cloud Run à créer/mettre à jour
-  IMAGE_NAME:     php-fpm-app                          # Nom de l’image Docker
-  REPOSITORY:     my-repo                              # Nom du dépôt Artifact Registry
-  HOST:           europe-docker.pkg.dev                # Domaine Artifact Registry pour la région Europe
+  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+  REGION: ${{ secrets.GCP_REGION }}
+  SERVICE_NAME: php-fpm-service
+  IMAGE_NAME: php-fpm-app
+  REPOSITORY: my-repo
+  HOST: europe-docker.pkg.dev
+  DOCKERFILE_PATH: modules/cloud_run/Dockerfile
+  BUILD_CONTEXT: modules/cloud_run/
 
 permissions:
-  contents: read   # Autorise l’accès au code du dépôt
-  id-token: write  # Nécessaire pour google-github-actions/auth@v2
+  contents: read
+  id-token: write
 
 jobs:
-  build-and-push:
-    name: Build & Push Docker Image
+  test:
+    name: Run Tests
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-        # Récupère le code source pour le build
 
-      - name: Authenticate to GCP
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+
+      - name: Install dependencies
+        run: composer install --no-progress --no-suggest --prefer-dist
+
+      - name: Run tests
+        run: vendor/bin/phpunit
+
+  build-and-push:
+    name: Build & Push Docker Image
+    runs-on: ubuntu-latest
+    needs: test
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
         with:
           credentials_json: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
-        # Authentifie le runner GitHub auprès de GCP via la clé JSON stockée en secret
 
       - name: Configure Docker for Artifact Registry
-        run: gcloud auth configure-docker $HOST
-        # Configure Docker pour utiliser les credentials GCP pour les opérations push/pull
+        run: gcloud auth configure-docker ${{ env.HOST }}
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
-        # Active Buildx pour des builds avancés si nécessaire
 
       - name: Build and push image
         uses: docker/build-push-action@v3
         with:
-          context: modules/cloud_run/                                      # Contexte de build (dossier contenant le Dockerfile)
-          file: modules/cloud_run/Dockerfile                              # Chemin vers le Dockerfile
-          push: true                                                       # Effectue automatiquement le push après le build
-          tags: $HOST/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:latest
-        # Construit l’image et la pousse vers Artifact Registry
+          context: ${{ env.BUILD_CONTEXT }}
+          file: ${{ env.DOCKERFILE_PATH }}
+          push: true
+          tags: ${{ env.HOST }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:latest
 
   deploy:
     name: Deploy to Cloud Run
     runs-on: ubuntu-latest
-    needs: build-and-push  # Attendre que l’image soit poussée avant de déployer
+    needs: build-and-push
 
     steps:
-      - name: Authenticate to GCP
+      - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
         with:
           credentials_json: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
-        # Ré-authentifie GCP pour la phase de déploiement
 
-      - name: Deploy service
+      - name: Deploy to Cloud Run
         uses: google-github-actions/deploy-cloudrun@v1
         with:
-          service: ${{ env.SERVICE_NAME }}                                                     # Nom du service Cloud Run
-          image:   $HOST/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:latest  # Image Docker à déployer
-          region:  ${{ env.REGION }}                                                             # Région GCP
-          allow-unauthenticated: true                                                            # Rend le service accessible publiquement
-        # Déploie l’image sur Cloud Run via le gcloud CLI
+          service: ${{ env.SERVICE_NAME }}
+          image: ${{ env.HOST }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:latest
+          region: ${{ env.REGION }}
+          allow-unauthenticated: true
 

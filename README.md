@@ -1,17 +1,18 @@
 # devops-test-Blue  
 **Test Technique – Ingénieur DevOps**
 
----
+##  Présentation du Projet  
+Ce dépôt contient ma solution au test technique DevOps sur Google Cloud Platform (GCP). À travers ce challenge :
 
-## 🚀 Présentation du Projet  
-Ce dépôt rassemble ma solution au test technique DevOps sur Google Cloud Platform (GCP). À travers ce challenge, j’ai démontré ma capacité à :
+Maîtriser rapidement GCP : activation des APIs, gestion des IAM, utilisation d’Artifact Registry.
 
-- Appréhender rapidement Google Cloud (activation d’APIs, IAM, Artifact Registry…)  
-- Concevoir une infrastructure sécurisée et modulaire en Terraform  
-- Automatiser un pipeline CI/CD complet (GitHub Actions pour build, test, push, déploiement)  
-- Écrire un script Bash fiable pour récupérer l’IP publique d’un service Cloud Run  
+Concevoir une infrastructure modulaire et sécurisée avec Terraform.
 
-Ces étapes m’ont permis de renforcer mes compétences IaC, CI/CD et scripting, et témoignent de ma motivation pour le poste.
+Automatiser un pipeline CI/CD complet : build, test, push et déploiement via GitHub Actions.
+
+Développer un script Bash robuste pour récupérer l’IP publique d’un service Cloud Run.
+
+Ces étapes illustrent mes compétences en IaC, CI/CD et scripting, témoignant de ma motivation pour le poste.
 
 ---
 
@@ -30,33 +31,34 @@ Ces étapes m’ont permis de renforcer mes compétences IaC, CI/CD et scripting
 
 ## 📂 Structure du Répertoire  
 
+.
 ├── .github/
-│ └── workflows/
-│ └── ci-cd.yml # GitHub Actions CI/CD pipeline
+│   └── workflows/
+│       └── ci-cd.yml               # Pipeline CI/CD GitHub Actions
 ├── modules/
-│ ├── cloud_sql/ # Module Cloud SQL
-│ ├── cloud_storage/ # Module Cloud Storage
-│ ├── cloud_run/ # Module Cloud Run + Dockerfile
-│ └── load_balancer/ # Module Load Balancer
-├── Dockerfile # PHP-FPM + Nginx config
-├── get-cloud-run-ip.sh # Script Bash de récupération d’IP
-├── main.tf # Root Terraform configuration
-├── provider.tf # Provider & backend
-├── variables.tf # Variables Terraform
-├── terraform.tfvars # Valeurs par défaut
-├── outputs.tf # Outputs Terraform
-└── README.md # Cette documentation
+│   ├── cloud_sql/                  # Module Terraform pour Cloud SQL
+│   ├── cloud_storage/              # Module Terraform pour Cloud Storage
+│   ├── cloud_run/                  # Module Terraform pour Cloud Run + Dockerfile
+│   └── load_balancer/              # Module Terraform pour le Load Balancer
+├── get-cloud-run-ip.sh             # Script Bash pour récupérer l’IP publique
+├── main.tf                         # Configuration principale Terraform
+├── provider.tf                     # Configuration du provider et backend
+├── variables.tf                    # Déclaration des variables Terraform
+├── terraform.tfvars                # Valeurs par défaut des variables
+├── outputs.tf                      # Outputs Terraform
+└── README.md                       # Documentation du projet
+
 
 
 ---
 
-## ⚙️ Guide d’Installation & Déploiement
+## Guide d’Installation & Déploiement
 
 ### 1. Prérequis  
 - Compte GCP avec facturation active  
 - SDK `gcloud`, Terraform v1.x et Docker installés  
 
-### 2. Configuration des Variables d’Environnement  
+### 2. Configuration des Variables d’Environnement Infrastructure as Code (Terraform) 
 ```bash
 export PROJECT_ID="devops-test-terraform-blue"
 export REGION="europe-west1"
@@ -66,7 +68,7 @@ export TF_VAR_bucket_name="my-static-files"
 export TF_VAR_db_password="MotDePasseFort123!"
 
 
-3. Infrastructure as Code (Terraform)
+### 3. Infrastructure as Code (Terraform)
 
 # Initialisation
 terraform init
@@ -83,7 +85,7 @@ terraform apply tfplan
 # Affichage des outputs
 terraform output
 
-4. CI/CD Pipeline avec GitHub Actions
+### 4. CI/CD Pipeline avec GitHub Actions:
 
 Dans GitHub → Settings → Secrets, créez :
 
@@ -103,10 +105,17 @@ Build et push Docker avec Buildx (docker/build-push-action@v3)
 
 Déploiement sur Cloud Run (google-github-actions/deploy-cloudrun@v1)
 
-5. Récupération de l’IP Publique : 
+Result:
+suphotio@ubuntu-s-1vcpu-512mb-10gb-nyc1-01:~/BLUE/devops-test-Blue/modules/cloud_run$ docker run -p 8080:8080 -e PORT=8080 php-fpm-app
+[20-May-2025 22:57:35] NOTICE: fpm is running, pid 8
+[20-May-2025 22:57:35] NOTICE: ready to handle connections
+127.0.0.1 -  20/May/2025:22:58:18 +0000 "GET /app.php" 200
+
+
+### 5. Récupération de l’IP Publique : 
 
 ./get-cloud-run-ip.sh dev
-
+Resultat : 
 suphotio@ubuntu-s-1vcpu-512mb-10gb-nyc1-01:~/BLUE/devops-test-Blue$ ./get-cloud-run-ip.sh dev
 [2025-05-20 19:02:58] Démarrage du script pour l'environnement 'dev'
 [2025-05-20 19:03:04] URL du service : https://mon-service-dev-364751985015.europe-west1.run.app
@@ -116,9 +125,7 @@ Adresse IP publique du service 'mon-service-dev' (dev) : 2600:1900:4245:200::
 
 [2025-05-20 19:03:04] Script exécuté avec succès pour l'environnement 'dev'.
 
-
-🚧 Retours d’Expérience & Résolution de Problèmes
-Permissions IAM
+### Retours d’Expérience & Résolution de Problèmes
 
 Attribution de roles/iam.serviceAccountUser pour actAs
 
@@ -132,15 +139,14 @@ Erreur “denied: Unauthenticated request”
 
 Correct credential helper Docker + rôle IAM
 
-Montée en compétences
-
 Terraform modulaire (modules réutilisables)
 
 Pipelines GitHub Actions documentés et testés
 
 Script Bash robuste avec journalisation et gestion d’erreurs
 
-🌱 Perspectives & Améliorations
+
+### Perspectives & Améliorations
 
 Monitoring & Alerting : Cloud Monitoring, alertes 5xx/CPU
 

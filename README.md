@@ -1,181 +1,149 @@
-# devops-test-Blue
-# DevOps Engineer Technical Test
+# devops-test-Blue  
+**Test Technique – Ingénieur DevOps**
 
-Ce projet évalue vos compétences en Infrastructure as Code (IaC) avec Terraform, en développement de pipeline CI/CD via GitHub Actions, et en scripting Bash, dans le contexte d'une application PHP-FPM déployée sur Google Cloud Platform (GCP).
+---
 
-## Architecture Déployée
+## 🚀 Présentation du Projet  
+Ce dépôt rassemble ma solution au test technique DevOps sur Google Cloud Platform (GCP). À travers ce challenge, j’ai démontré ma capacité à :
 
-- **Cloud SQL (MySQL 8)** : Instance `devops-sql-instance` avec une base de données `app_db` et un utilisateur `db_admin`.
-- **Cloud Storage** : Bucket `my-static-files` pour le stockage des fichiers statiques.
-- **Cloud Run** : Service `php-fpm-app` exécutant une application PHP-FPM derrière un proxy Nginx.
-- **Load Balancer HTTP(S)** : Routage du trafic vers le service Cloud Run via un Load Balancer HTTP(S) global.
+- Appréhender rapidement Google Cloud (activation d’APIs, IAM, Artifact Registry…)  
+- Concevoir une infrastructure sécurisée et modulaire en Terraform  
+- Automatiser un pipeline CI/CD complet (GitHub Actions pour build, test, push, déploiement)  
+- Écrire un script Bash fiable pour récupérer l’IP publique d’un service Cloud Run  
 
-## Arborescence du Projet
+Ces étapes m’ont permis de renforcer mes compétences IaC, CI/CD et scripting, et témoignent de ma motivation pour le poste.
 
-├── README.md
-├── main.tf
-├── provider.tf
-├── variables.tf
-├── terraform.tfvars
-├── outputs.tf
-├── modules/
-│ ├── cloud_sql/
-│ ├── cloud_storage/
-│ ├── cloud_run/
-│ └── load_balancer/
+---
+
+## 🗺️ Architecture & Composants  
+1. **Cloud SQL (MySQL 8)**  
+   - Instance `devops-sql-instance`  
+   - Base de données `app_db`, utilisateur `db_admin`  
+2. **Cloud Storage**  
+   - Bucket `my-static-files` pour les assets statiques  
+3. **Cloud Run**  
+   - Service `php-fpm-app` exécutant PHP-FPM derrière Nginx  
+4. **Load Balancer HTTP(S)**  
+   - Routage global vers le service Cloud Run  
+
+---
+
+## 📂 Structure du Répertoire  
+
 ├── .github/
 │ └── workflows/
-│ └── ci-cd.yml
-├── get-cloud-run-ip.sh
-└── Dockerfile
+│ └── ci-cd.yml # GitHub Actions CI/CD pipeline
+├── modules/
+│ ├── cloud_sql/ # Module Cloud SQL
+│ ├── cloud_storage/ # Module Cloud Storage
+│ ├── cloud_run/ # Module Cloud Run + Dockerfile
+│ └── load_balancer/ # Module Load Balancer
+├── Dockerfile # PHP-FPM + Nginx config
+├── get-cloud-run-ip.sh # Script Bash de récupération d’IP
+├── main.tf # Root Terraform configuration
+├── provider.tf # Provider & backend
+├── variables.tf # Variables Terraform
+├── terraform.tfvars # Valeurs par défaut
+├── outputs.tf # Outputs Terraform
+└── README.md # Cette documentation
 
 
-## Prérequis
+---
 
-- Compte Google Cloud avec facturation activée.
-- SDK `gcloud` installé et configuré.
-- Terraform installé.
-- Docker installé (pour la construction de l'image).
+## ⚙️ Guide d’Installation & Déploiement
 
-## Configuration des Variables d'Environnement
+### 1. Prérequis  
+- Compte GCP avec facturation active  
+- SDK `gcloud`, Terraform v1.x et Docker installés  
 
-Avant d'exécuter Terraform, définissez les variables d'environnement nécessaires :
-
+### 2. Configuration des Variables d’Environnement  
 ```bash
-export TF_VAR_project_id="votre-id-de-projet"
-export TF_VAR_region="europe-west1"
+export PROJECT_ID="devops-test-terraform-blue"
+export REGION="europe-west1"
+export TF_VAR_project_id=$PROJECT_ID
+export TF_VAR_region=$REGION
 export TF_VAR_bucket_name="my-static-files"
-export TF_VAR_db_password="motdepassefort"
+export TF_VAR_db_password="MotDePasseFort123!"
 
-# Déploiement de l'Infrastructure avec Terraform
 
-## Initialisation :
+3. Infrastructure as Code (Terraform)
 
-```bash
+# Initialisation
 terraform init
 
-Validation de la configuration :
-
-# Initialiser Terraform et backend
-terraform init
-
-# Vérifier la configuration
+# Vérification de la configuration
 terraform validate
 
-# Générer un plan d’exécution
+# Planification
 terraform plan -out=tfplan
 
-# Appliquer la configuration
+# Application
 terraform apply tfplan
 
-# Afficher les outputs
+# Affichage des outputs
 terraform output
 
-Pipeline CI/CD avec GitHub Actions
+4. CI/CD Pipeline avec GitHub Actions
 
-Workflow GitHub Actions
+Dans GitHub → Settings → Secrets, créez :
 
-Créez un fichier .github/workflows/ci-cd.yml avec le contenu suivant :
+GCP_PROJECT_ID
 
-yaml
+GCP_REGION
 
-name: CI/CD Pipeline
+GCP_SERVICE_ACCOUNT_KEY (clé JSON du service account)
 
-on:
-  push:
-    branches:
-      - main
-    paths:
-      - 'terraform/**'
-      - 'Dockerfile'
-      - '.github/workflows/ci-cd.yml'
+Le workflow .github/workflows/ci-cd.yml fait :
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
+Checkout du code
 
-    steps:
-      - name: Vérifier le code
-        uses: actions/checkout@v2
+Authentification GCP (google-github-actions/auth@v2)
 
-      - name: Configurer Terraform
-        uses: hashicorp/setup-terraform@v2
-        with:
-          terraform_version: 1.3.0
+Build et push Docker avec Buildx (docker/build-push-action@v3)
 
-      - name: Initialiser Terraform
-        run: terraform init
+Déploiement sur Cloud Run (google-github-actions/deploy-cloudrun@v1)
 
-      - name: Valider la configuration Terraform
-        run: terraform validate
+5. Récupération de l’IP Publique
 
-      - name: Planifier le déploiement Terraform
-        run: terraform plan -out=tfplan
+./get-cloud-run-ip.sh dev
 
-      - name: Appliquer le déploiement Terraform
-        run: terraform apply -auto-approve tfplan
 
-      - name: Construire l'image Docker
-        run: |
-          docker build -t gcr.io/$GCP_PROJECT_ID/php-fpm-app:latest .
-          echo ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }} | docker login -u _json_key --password-stdin https://gcr.io
 
-      - name: Pousser l'image Docker
-        run: docker push gcr.io/$GCP_PROJECT_ID/php-fpm-app:latest
+🚧 Retours d’Expérience & Résolution de Problèmes
+Permissions IAM
 
-      - name: Déployer sur Cloud Run
-        run: |
-          gcloud run deploy php-fpm-app \
-            --image gcr.io/$GCP_PROJECT_ID/php-fpm-app:latest \
-            --platform managed \
-            --region $GCP_REGION \
-            --allow-unauthenticated
-Variables d'environnement
-Définissez les variables suivantes dans les secrets de votre dépôt GitHub :
+Attribution de roles/iam.serviceAccountUser pour actAs
 
-GCP_PROJECT_ID: ID de votre projet Google Cloud.
+roles/artifactregistry.writer pour le push Docker
 
-GCP_REGION: Région de déploiement (par exemple, europe-west1).
+Activation d’APIs
 
-GCP_SERVICE_ACCOUNT_KEY: Clé JSON de votre compte de service Google Cloud.
+cloudresourcemanager, iam, run, artifactregistry
 
-Accès à l'Application Déployée
-Une fois le déploiement terminé, accédez à l'application via l'URL fournie dans les outputs Terraform.
+Erreur “denied: Unauthenticated request”
 
-Exécution du Script Bash pour Récupérer l'IP Publique
-Le script get-cloud-run-ip.sh permet de récupérer l'adresse IP publique du service Cloud Run :
+Correct credential helper Docker + rôle IAM
 
-bash
-Copier
-Modifier
-./get-cloud-run-ip.sh
-Dépannage
-Problème d'accès au socket Docker : Si vous rencontrez une erreur liée au socket Docker, assurez-vous que votre utilisateur a les permissions appropriées ou exécutez les commandes Docker avec sudo.
+Montée en compétences
 
-Problème de connexion à Cloud Run : Vérifiez que le service Cloud Run est correctement déployé et que les règles de pare-feu permettent l'accès.
+Terraform modulaire (modules réutilisables)
 
-Problèmes Rencontrés et Solutions
-Problème de permissions lors du push Docker : L'erreur denied: Unauthenticated request indique un problème d'authentification. Assurez-vous que vous êtes connecté à Google Cloud avec les bonnes permissions et que Docker est configuré pour utiliser les identifiants appropriés.
+Pipelines GitHub Actions documentés et testés
 
-Améliorations pour un Environnement de Production
-Pour rendre cet environnement prêt pour la production, envisagez les améliorations suivantes :
+Script Bash robuste avec journalisation et gestion d’erreurs
 
-Surveillance : Intégration de Stackdriver pour la surveillance des ressources et des logs.
+🌱 Perspectives & Améliorations
 
-Sécurité : Mise en place de rôles IAM stricts, utilisation de secrets via Secret Manager, et configuration de Cloud Armor pour la protection DDoS.
+Monitoring & Alerting : Cloud Monitoring, alertes 5xx/CPU
 
-CI/CD : Ajout de tests unitaires et d'intégration dans le pipeline GitHub Actions, et utilisation de Cloud Build pour la construction des images Docker.
+Sécurité : Secret Manager, Cloud Armor, OIDC sans clés JSON
 
-Haute disponibilité : Déploiement multi-régions pour assurer la disponibilité continue de l'application.
+Tests Automatisés : PHPUnit et couverture de code dans le pipeline
 
-Références
+HA & DR : Multi-régions, backups Cloud SQL, stratégie DR dans dr.md
 
-Terraform Google Cloud SQL Module
+Documentation Automatique : intégration terraform-docs, diagrammes Mermaid
 
-Terraform Google Cloud Run Module
+Extras : idées et expérimentations consignées dans extra.md
 
-Terraform Google Cloud Storage Module
-
-Terraform Google Load Balancer Module
-
-GitHub Actions Documentation
+Ce projet, réalisé, démontre ma capacité à gérer de bout en bout un cycle DevOps : de la définition de l’infrastructure à son déploiement automatisé, en passant par la résolution proactive des problèmes et la documentation claire des solutions. J’aspire à mettre cette expertise et cette passion au service de votre équipe

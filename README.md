@@ -103,10 +103,18 @@ Build et push Docker avec Buildx (docker/build-push-action@v3)
 
 Déploiement sur Cloud Run (google-github-actions/deploy-cloudrun@v1)
 
-5. Récupération de l’IP Publique
+5. Récupération de l’IP Publique : 
 
 ./get-cloud-run-ip.sh dev
 
+suphotio@ubuntu-s-1vcpu-512mb-10gb-nyc1-01:~/BLUE/devops-test-Blue$ ./get-cloud-run-ip.sh dev
+[2025-05-20 19:02:58] Démarrage du script pour l'environnement 'dev'
+[2025-05-20 19:03:04] URL du service : https://mon-service-dev-364751985015.europe-west1.run.app
+[2025-05-20 19:03:04] Adresse IP publique du service : 2600:1900:4245:200::
+
+Adresse IP publique du service 'mon-service-dev' (dev) : 2600:1900:4245:200::
+
+[2025-05-20 19:03:04] Script exécuté avec succès pour l'environnement 'dev'.
 
 
 🚧 Retours d’Expérience & Résolution de Problèmes

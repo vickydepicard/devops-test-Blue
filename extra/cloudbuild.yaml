@@ -1,8 +1,21 @@
 steps:
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['build', '-t', 'europe-docker.pkg.dev/$PROJECT_ID/my-repo/php-fpm-app:latest', '.']
+    args:
+      [
+        'build',
+        '-t',
+        'europe-docker.pkg.dev/devops-test-terraform-blue/my-repo/php-fpm-app:latest',
+        '.'
+      ]
+    dir: 'modules/cloud_run'
+
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['push', 'europe-docker.pkg.dev/$PROJECT_ID/my-repo/php-fpm-app:latest']
+    args:
+      [
+        'push',
+        'europe-docker.pkg.dev/devops-test-terraform-blue/my-repo/php-fpm-app:latest'
+      ]
+
 images:
-  - 'europe-docker.pkg.dev/$PROJECT_ID/my-repo/php-fpm-app:latest'
+  - 'europe-docker.pkg.dev/devops-test-terraform-blue/my-repo/php-fpm-app:latest'
 

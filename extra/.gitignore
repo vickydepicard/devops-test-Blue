@@ -1,0 +1,13 @@
+# Terraform state files
+*.tfstate
+*.tfstate.*
+
+# Local .terraform directory
+.terraform/
+
+# Crash logs
+crash.log
+
+# Service account keys
+*.json
+

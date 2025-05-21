@@ -1,0 +1,8 @@
+steps:
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', 'europe-docker.pkg.dev/$PROJECT_ID/my-repo/php-fpm-app:latest', '.']
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'europe-docker.pkg.dev/$PROJECT_ID/my-repo/php-fpm-app:latest']
+images:
+  - 'europe-docker.pkg.dev/$PROJECT_ID/my-repo/php-fpm-app:latest'
+

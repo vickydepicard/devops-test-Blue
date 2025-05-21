@@ -19,3 +19,6 @@ steps:
 images:
   - 'europe-docker.pkg.dev/devops-test-terraform-blue/my-repo/php-fpm-app:latest'
 
+options:
+  logging: CLOUD_LOGGING_ONLY
+

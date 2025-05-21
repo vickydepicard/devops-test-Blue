@@ -67,7 +67,7 @@ export TF_VAR_region=$REGION
 export TF_VAR_bucket_name="my-static-files"
 export TF_VAR_db_password="MotDePasseFort123!"
 
-
+```
 ### 3. Infrastructure as Code (Terraform)
 
 # Initialisation
@@ -84,7 +84,8 @@ terraform apply tfplan
 
 # Affichage des outputs
 terraform output
-
+```
+```
 ### 4. CI/CD Pipeline avec GitHub Actions:
 
 Dans GitHub → Settings → Secrets, créez :
@@ -111,7 +112,7 @@ suphotio@ubuntu-s-1vcpu-512mb-10gb-nyc1-01:~/BLUE/devops-test-Blue/modules/cloud
 [20-May-2025 22:57:35] NOTICE: ready to handle connections
 127.0.0.1 -  20/May/2025:22:58:18 +0000 "GET /app.php" 200
 
-
+`
 ### 5. Récupération de l’IP Publique : 
 
 ./get-cloud-run-ip.sh dev
@@ -125,8 +126,24 @@ Adresse IP publique du service 'mon-service-dev' (dev) : 2600:1900:4245:200::
 
 [2025-05-20 19:03:04] Script exécuté avec succès pour l'environnement 'dev'.
 
-### Retours d’Expérience & Résolution de Problèmes
+``
+### 6. Additional challenges (Terraform) 
 
+ Intégration de Cloud Build pour la construction d'images Docker
+Objectif : Automatiser la construction et le stockage des images Docker à l'aide de Cloud Build.
+
+Mise en œuvre de l'infrastructure as code avec Terraform Cloud
+Objectif : Utiliser Terraform Cloud pour gérer l'infrastructure en tant que code avec une livraison continue.
+
+Application des meilleures pratiques de sécurité IAM : 
+Objectif : Mettre en œuvre des pratiques de sécurité robustes pour l'authentification et l'autorisation.
+
+Élaboration une stratégie de reprise après sinistre pour assurer la résilience de l'application : 
+Objectif : Définir les objectifs RTO (Recovery Time Objective) et RPO (Recovery Point Objective) pour chaque composant :
+
+``
+### Retours d’Expérience & Résolution de Problèmes
+```
 Attribution de roles/iam.serviceAccountUser pour actAs
 
 roles/artifactregistry.writer pour le push Docker
@@ -145,7 +162,7 @@ Pipelines GitHub Actions documentés et testés
 
 Script Bash robuste avec journalisation et gestion d’erreurs
 
-
+```
 ### Perspectives & Améliorations
 
 Monitoring & Alerting : Cloud Monitoring, alertes 5xx/CPU
